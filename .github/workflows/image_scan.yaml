@@ -84,7 +84,7 @@ jobs:
 
           output_format: cli,sarif
           output_file_path: console,results.sarif
-          check: "CKV_CVE*"  # Only CVE check
+          check: "BC_CVE*"  # Only CVE check
 
       - name: Upload SARIF report
         uses: actions/upload-artifact@v2
