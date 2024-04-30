@@ -2,7 +2,7 @@
 # vars.PRISMA_API_URL
 # secrets.PC_ACCESS_KEY
 # secrets.PC_SECRET_KEY
-name: Prisma Cloud Checks
+name: Prisma Cloud All Checks
 on:
   pull_request:
   push:

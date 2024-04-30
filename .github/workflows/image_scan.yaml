@@ -2,7 +2,7 @@
 # vars.PRISMA_API_URL
 # secrets.PC_ACCESS_KEY
 # secrets.PC_SECRET_KEY
-name: Prisma Cloud Checks
+name: Prisma Cloud Image scans
 on:
   pull_request:
   push:
@@ -81,3 +81,35 @@ jobs:
           api-key: ${{ secrets.PC_ACCESS_KEY }}::${{ secrets.PC_SECRET_KEY }} # Bridgecrew API key stored as a GitHub secret
           prisma-api-url: ${{ vars.PRISMA_API_URL }}
           use_enforcement_rules: true
+
+  sandbox-image:
+    name: Sandbox image
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: read
+
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v2
+
+      - name: Build the image
+        run: docker build -t $IMAGE_NAME .
+
+      - name: Download Twistcli
+        if: ${{ always() }}
+        run: |
+          chmod +x twistcli_download.sh
+          ./twistcli_download.sh
+        env:
+          PCC_URL: ${{ vars.PCC_CONSOLE_URL }}
+          PC_ACCESS_KEY: ${{ secrets.PC_ACCESS_KEY }}
+          PC_SECRET_KEY: ${{ secrets.PC_SECRET_KEY }}
+
+      - name: Run Image Sandbox
+        if: ${{ always() }}
+        run: sudo -E ./twistcli sandbox --address "${PCC_CONSOLE_URL}" ${{ env.IMAGE_NAME }}
+        env:
+          PCC_CONSOLE_URL: ${{ vars.PCC_CONSOLE_URL }}
+          TWISTLOCK_USER: ${{ secrets.PC_ACCESS_KEY }}
+          TWISTLOCK_PASSWORD: ${{ secrets.PC_SECRET_KEY }}
