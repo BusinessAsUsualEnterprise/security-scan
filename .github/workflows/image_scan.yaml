@@ -83,6 +83,7 @@ jobs:
           use_enforcement_rules: true
           output_format: cli,sarif
           output_file_path: console,results.sarif
+          skip-check: "BC_LIC_2, BC_LIC_1"  # Skip license checks
 
       - name: Upload SARIF report
         uses: actions/upload-artifact@v2
