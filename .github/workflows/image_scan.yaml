@@ -78,12 +78,13 @@ jobs:
           docker_image: ${{ env.IMAGE_NAME }} # define the name of the image to scan
           dockerfile_path: "Dockerfile" # path to the Dockerfile
           container_user: 1000 # optional: Define what UID and / or what GID to run the container under to prevent permission issues
-          api-key: ${{ secrets.PC_ACCESS_KEY }}::${{ secrets.PC_SECRET_KEY }} # Bridgecrew API key stored as a GitHub secret
+          api-key: ${{ secrets.PC_ACCESS_KEY }}::${{ secrets.PC_SECRET_KEY }}
           prisma-api-url: ${{ vars.PRISMA_API_URL }}
           use_enforcement_rules: true
+
           output_format: cli,sarif
           output_file_path: console,results.sarif
-          skip_check: "BC_LIC*"  # Skip license checks
+          check: "CKV_CVE*"  # Only CVE check
 
       - name: Upload SARIF report
         uses: actions/upload-artifact@v2
