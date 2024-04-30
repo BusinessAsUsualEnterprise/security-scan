@@ -1,2 +1,2 @@
-FROM simonpanw/spring4shell-vulnerable-tomcat:latest
+FROM ubuntu:latest
 USER root
