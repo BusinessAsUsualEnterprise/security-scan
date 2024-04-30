@@ -73,8 +73,8 @@ jobs:
         id: checkov
         uses: bridgecrewio/checkov-action@master
         with:
-          quiet: true # optional: display only failed checks
-          soft_fail: true # optional: do not return an error code if there are failed checks
+          quiet: false # optional: display only failed checks
+          # soft_fail: true # optional: do not return an error code if there are failed checks
           docker_image: ${{ env.IMAGE_NAME }} # define the name of the image to scan
           dockerfile_path: "Dockerfile" # path to the Dockerfile
           container_user: 1000 # optional: Define what UID and / or what GID to run the container under to prevent permission issues
