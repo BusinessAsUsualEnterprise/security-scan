@@ -1,2 +1,3 @@
-FROM simonpanw/spring4shell-vulnerable-tomcat:latest
+FROM ubuntu:20.04
 USER root
+RUN apt update && apt install curl -y
