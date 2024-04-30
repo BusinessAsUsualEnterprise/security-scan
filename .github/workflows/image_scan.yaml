@@ -1,0 +1,83 @@
+# vars.PCC_CONSOLE_URL
+# vars.PRISMA_API_URL
+# secrets.PC_ACCESS_KEY
+# secrets.PC_SECRET_KEY
+name: Prisma Cloud Checks
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+env:
+  IMAGE_NAME: demo:latest
+
+jobs:
+  build-and-scan-image:
+    name: Build & scan image
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: read
+      security-events: write  # For SARIF
+
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v2
+
+      - name: Build the image
+        run: docker build -t $IMAGE_NAME .
+
+      - name: Container Image Scan
+        id: scan
+        uses: PaloAltoNetworks/prisma-cloud-scan@v1
+        with:
+          pcc_console_url: ${{ vars.PCC_CONSOLE_URL }}
+          pcc_user: ${{ secrets.PC_ACCESS_KEY }}
+          pcc_pass: ${{ secrets.PC_SECRET_KEY }}
+          image_name: ${{ env.IMAGE_NAME }}
+
+      - name: Upload SARIF report
+        uses: actions/upload-artifact@v2
+        if: ${{ always() }}
+        with:
+          name: SARIF results twistcli
+          path: ${{ steps.scan.outputs.sarif_file }}
+
+      # # Only for public repos or enterprise accounts
+      # # (Optional) for compatibility with GitHub's code scanning alerts
+      # - name: Upload SARIF file
+      #   if: ${{ always() }} # necessary if using failure thresholds in the image scan
+      #   uses: github/codeql-action/upload-sarif@v2
+      #   with:
+      #     sarif_file: ${{ steps.scan.outputs.sarif_file }}
+
+  build-and-scan-image-checkov:
+    name: Checkov Build & scan image
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: read
+      security-events: write  # For SARIF
+
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v2
+
+      - name: Build the image
+        run: docker build -t $IMAGE_NAME .
+
+      - name: Run Checkov action
+        id: checkov
+        uses: bridgecrewio/checkov-action@master
+        with:
+          quiet: true # optional: display only failed checks
+          soft_fail: true # optional: do not return an error code if there are failed checks
+          docker_image: ${{ env.IMAGE_NAME }} # define the name of the image to scan
+          dockerfile_path: "Dockerfile" # path to the Dockerfile
+          container_user: 1000 # optional: Define what UID and / or what GID to run the container under to prevent permission issues
+          api-key: ${{ secrets.PC_ACCESS_KEY }}::${{ secrets.PC_SECRET_KEY }} # Bridgecrew API key stored as a GitHub secret
+          prisma-api-url: ${{ vars.PRISMA_API_URL }}
+          use_enforcement_rules: true
