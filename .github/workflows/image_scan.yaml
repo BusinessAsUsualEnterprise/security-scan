@@ -81,6 +81,16 @@ jobs:
           api-key: ${{ secrets.PC_ACCESS_KEY }}::${{ secrets.PC_SECRET_KEY }} # Bridgecrew API key stored as a GitHub secret
           prisma-api-url: ${{ vars.PRISMA_API_URL }}
           use_enforcement_rules: true
+          use_enforcement_rules: true
+          output_format: cli,sarif
+          output_file_path: console,results.sarif
+
+      - name: Upload SARIF report
+        uses: actions/upload-artifact@v2
+        if: ${{ always() }}
+        with:
+          name: SARIF results image scan
+          path: results.sarif
 
   sandbox-image:
     name: Sandbox image
